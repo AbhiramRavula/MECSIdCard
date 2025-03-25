@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ID card replica</title>
+    <title>ID card </title>
     <style>
       body {
         background-color: black;
@@ -12,15 +12,44 @@
         justify-content: center;
         align-items: flex-start;
         flex-direction: column;
+        -webkit-user-select: none; /* Disable text selection */
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      body::before {
+        content: "CONFIDENTIAL";
+        position:relative;
+        padding-top: 50px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) ;
+        font-size: 5rem;
+        color: rgba(255, 0, 0, 0.3);
+        z-index: 9999;
+        pointer-events: none;
+      }
+      .card_base::before {
+        content: "CONFIDENTIAL";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(45deg); /* Center and rotate */
+        font-size: 3rem; /* Adjust font size to fit the card */
+        color: rgba(255, 0, 0, 0.3); /* Semi-transparent red */
+        z-index: 9999;
+        pointer-events: none; /* Ensure it doesn't interfere with interactions */
       }
       .card_base {
+        position: relative;
         width: 300px;
-        height: 480px;
+        height: 460px;
         background-color: #fff;
         color: black;
         border-radius: 5%;
         margin: 20px auto;
       }
+      
       .C-header {
         background-color: rgb(248, 250, 250);
         z-index: 1;
@@ -32,8 +61,9 @@
       .C-body {
         background-color: blue;
         color: #fff;
-        margin-top: -20px;
+        margin-top: -22px;
         display: flex;
+        /* align-items: stretch; */
       }
       .branch {
         display: flex;
@@ -50,12 +80,14 @@
       }
       .photo {
         flex: 1;
+        
       }
       .photo img {
         width: 150px;
-        height: 180px;
+        height: 188px;
         border-radius: 0px;
         border: 2px solid black;
+        object-fit: cover;
       }
       .year {
         display: flex;
@@ -148,11 +180,43 @@
         max-width: 800px;
         margin: 0 auto;
       }
+      .year,.branch,.name{
+        font-family: sans-serif;
+        font-weight: bold;
+      }
+      .logout-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: red;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .logout-btn:hover {
+        background-color: darkred;
+      }
+
+      /* Hide content when trying to print */
+      @media print {
+        body {
+          display: none;
+        }
+      }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
-  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <!-- Add these scripts in the head section -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   </head>
   <body>
+    <!-- Logout Button -->
+    <!-- <button class="logout-btn" onclick="returnToHome()">Logout</button> -->
+
     <div class="container">
       <div class="inputs">
         <h1>Edit details</h1>
@@ -179,31 +243,26 @@
 
         <label for="startYear">Starting Year:</label>
         <input type="number" id="startYear" name="startYear" min="1900" max="2099" required>
-        <label for="endYear">Ending Year:</label>
-        <input type="number" id="endYear" name="endYear" min="1900" max="2099" required>
 
         <button id="submit">Submit</button>
-        <button id="download">Download Card</button> <!-- Button to download the card -->
+        <button id="download" style="background-color:black; color: black;">Download Card</button> <!-- Button to download the card -->
       </div>
 
       <!-- Preview division -->
       <div class="preview" id="preview">
-        <h3>Preview</h3>
+        <h3 style="color:black">Image Preview</h3>
         <img id="previewImage" src="" alt="Image Preview" style="display: none;">
-        <p id="previewName"></p>
-        <p id="previewRollNumber"></p>
-        <p id="previewBranch"></p>
       </div>
     </div>
 
     <div class="card_base">
       <div class="C-header">
         <center>
-          <img src="https://th.bing.com/th/id/OIP.GLC2qr9XfoTSvSyEfRkUdgAAAA?w=158&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7" alt="MECS_logo" style="width: 40px;">
-          <h3 style="margin-top: -8px; color: red;">Matrusri Engineering College</h3>
-          <p style="font-size: 8px; margin-top: -15px;">
+          <img src="./images/matrusriLogo.jpeg" alt="MECS_logo" style="width: 40px;">
+          <h3 style="margin-top: -8px; color: red; font-family: serif; font-weight: bold;">Matrusri Engineering College</h3>
+          <p style=" margin-top: -15px; margin-bottom: -15px; font-family: sans-serif; font-size: 6px; font-weight: bold;">
             (Sponsored by Matrusri Education Society Estd. 1980) <br>
-            Affiliated to Osmania University & Recognized by AICTE, Saidabad, <br>
+            Affiliated to OsmaniaUniversity&Recognized by AICTE,Saidabad<br>
             Hyderabad-500059 www.matrusri.edu.in Ph. 040-24072764 <br>
           </p>
         </center>
@@ -226,7 +285,7 @@
         </div>
       </div>
       <div class="C-footer">
-        <div class="name">
+        <div class="name" style="font-family: sans-serif;">
           <center>
             <h5 id="nameText">SECM EGELLOC</h5> <!-- Added id for JavaScript targeting -->
             <h6 id="rollNumberText">1608-69-007-069</h6> <!-- Added id for JavaScript targeting -->
@@ -238,7 +297,7 @@
         </div>
         <div class="princeSign">
           <div>
-            <img src="./images/princSign.jpg" alt="sign" style="width: 50px;">
+            <img src="./images/princSign.jpg" alt="sign" style="width: 50px; font-family: sans-serif;">
             <p>Principal</p>
           </div>
         </div>
@@ -254,15 +313,18 @@
           const branchInput = document.getElementById('branchInput').value; // This will now get the selected branch
           const imageUrlInput = document.getElementById('imageUrl').value; // Get the image URL
           const imageUploadInput = document.getElementById('imageUpload').files[0]; // Get the uploaded file
+          const startYear = parseInt(document.getElementById('startYear').value);
 
           // Update the text in the respective elements
           const nameText = document.getElementById('nameText');
           const rollNumberText = document.getElementById('rollNumberText');
           const branchText = document.getElementById('branchText');
+          const yearText = document.getElementById('yearText');
 
           nameText.textContent = nameInput ? nameInput : nameText.textContent; // Update name h5
           rollNumberText.textContent = rollNumberInput ? rollNumberInput : rollNumberText.textContent; // Update roll number h6
           branchText.textContent = branchInput ? branchInput : branchText.textContent; // Update branch
+          yearText.textContent = startYear ? `${startYear}-${(startYear + 4).toString()}` : yearText.textContent; // Update year
 
           // Change the background color of the C-body based on the selected branch
           const cBody = document.querySelector('.C-body'); // Select the C-body element
@@ -333,15 +395,152 @@
         });
       });
 
-      document.getElementById('submit').addEventListener('click', function() {
-        const startYear = parseInt(document.getElementById('startYear').value);
-        const endYear = parseInt(document.getElementById('endYear').value);
+      document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('submit').addEventListener('click', function () {
+          // Get the input values
+          const nameInput = document.getElementById('name').value;
+          const rollNumberInput = document.getElementById('rollNumber').value;
+          const branchInput = document.getElementById('branchInput').value;
+          const imageUrlInput = document.getElementById('imageUrl').value;
+          const imageUploadInput = document.getElementById('imageUpload').files[0];
+          const startYear = parseInt(document.getElementById('startYear').value);
 
-        if (endYear - startYear === 4) {
-          document.getElementById('yearText').textContent = `${startYear}-${endYear.toString().slice(-2)}`;
-        } else {
-          alert('The difference between the starting and ending year must be 4 years.');
+          // Update the preview section
+          document.getElementById('previewName').textContent = nameInput || 'No Name Provided';
+          document.getElementById('previewRollNumber').textContent = rollNumberInput || 'No Roll Number Provided';
+          document.getElementById('previewBranch').textContent = branchInput || 'No Branch Provided';
+
+          // Update the year in the preview
+          const endYear = startYear + 4;
+          document.getElementById('yearText').textContent = `${startYear}-${endYear}`;
+
+          // Show the preview image
+          const previewImage = document.getElementById('previewImage');
+          if (imageUploadInput) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              previewImage.src = e.target.result; // Set the image source to the uploaded file
+              previewImage.style.display = 'block'; // Show the image
+            };
+            reader.readAsDataURL(imageUploadInput); // Read the uploaded file as a data URL
+          } else if (imageUrlInput) {
+            previewImage.src = imageUrlInput; // Update the image source with the new URL
+            previewImage.style.display = 'block'; // Show the image
+          } else {
+            previewImage.style.display = 'none'; // Hide the image if no URL is provided
+          }
+        });
+      });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('submit').addEventListener('click', function () {
+          // Get the image inputs
+          const imageUrlInput = document.getElementById('imageUrl').value;
+          const imageUploadInput = document.getElementById('imageUpload').files[0];
+
+          // Show the preview image
+          const previewImage = document.getElementById('previewImage');
+          if (imageUploadInput) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              previewImage.src = e.target.result; // Set the image source to the uploaded file
+              previewImage.style.display = 'block'; // Show the image
+            };
+            reader.readAsDataURL(imageUploadInput); // Read the uploaded file as a data URL
+          } else if (imageUrlInput) {
+            previewImage.src = imageUrlInput; // Update the image source with the new URL
+            previewImage.style.display = 'block'; // Show the image
+          } else {
+            previewImage.style.display = 'none'; // Hide the image if no URL is provided
+          }
+        });
+      });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('submit').addEventListener('click', function () {
+          // Get the input values
+          const startYear = parseInt(document.getElementById('startYear').value);
+
+          // Update the year in the yearText tag
+          const yearText = document.getElementById('yearText');
+          if (startYear) {
+            const endYear = startYear + 4; // Calculate the end year
+            yearText.textContent = `${startYear}-${endYear.toString().slice(-2)}`; // Update the year range
+          } else {
+            yearText.textContent = 'Invalid Year'; // Fallback if no valid year is entered
+          }
+        });
+      });
+
+      // Function to redirect to home.html
+      function returnToHome() {
+        window.location.href = "home.html";
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('download').addEventListener('click', function () {
+            const cardElement = document.querySelector('.card_base');
+            
+            if (!cardElement) {
+                alert('Error: ID card element not found.');
+                return;
+            }
+
+            // First, use html2canvas to capture the card
+            html2canvas(cardElement, {
+                scale: 2, // Increase quality
+                useCORS: true, // Enable CORS for images
+                logging: true // Enable logging for debugging
+            }).then(function(canvas) {
+                // Create PDF using jsPDF
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                // Calculate dimensions
+                const imgWidth = 210; // A4 width in mm
+                const pageHeight = 297; // A4 height in mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                // Add the image to PDF
+                const imgData = canvas.toDataURL('image/png');
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                
+                // Save the PDF
+                pdf.save('id_card.pdf');
+            }).catch(function(error) {
+                console.error('Error generating PDF:', error);
+                alert('Failed to generate PDF. Please try again.');
+            });
+        });
+      });
+    </script>
+    <script>
+      // Disable Print Screen key
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'PrintScreen') {
+          alert('Screenshots are disabled on this page.');
+          e.preventDefault();
         }
+      });
+
+      // Disable copying content to clipboard
+      document.addEventListener('copy', function (e) {
+        alert('Copying content is disabled on this page.');
+        e.preventDefault();
+      });
+
+      // Disable right-click context menu
+      document.addEventListener('contextmenu', function (e) {
+        alert('Right-click is disabled on this page.');
+        e.preventDefault();
+      });
+
+      window.addEventListener('blur', function () {
+        document.body.style.filter = 'blur(10px)';
+      });
+
+      window.addEventListener('focus', function () {
+        document.body.style.filter = 'none';
       });
     </script>
   </body>
