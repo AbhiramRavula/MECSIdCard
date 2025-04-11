@@ -543,5 +543,96 @@
         document.body.style.filter = 'none';
       });
     </script>
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
+      import { getFirestore, doc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
+      import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
+    
+      // Firebase configuration
+      const firebaseConfig = {
+
+        apiKey: "AIzaSyCQXkjID_hVq7cRulFLonmmse1trl1owWs",
+  authDomain: "mecsidcard.firebaseapp.com",
+  databaseURL: "https://mecsidcard-default-rtdb.firebaseio.com",
+  projectId: "mecsidcard",
+  storageBucket: "mecsidcard.firebasestorage.app",
+  messagingSenderId: "518545433450",
+  appId: "1:518545433450:web:5ecfb1f54780a4a96cfb13",
+  measurementId: "G-TGBK5BNWML"
+      };
+    
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+    
+      // Wait for the user to log in
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          const userEmail = user.email; // Get the logged-in user's email
+    
+          document.getElementById('submit').addEventListener('click', async function () {
+            const nameInput = document.getElementById('name').value; // Get the entered name
+    
+            if (nameInput) {
+              try {
+                // Reference to the user's document in Firestore
+                const userDocRef = doc(db, 'users', userEmail);
+    
+                // Update the Firestore document by adding the name to the "names" array
+                await updateDoc(userDocRef, {
+                  names: arrayUnion(nameInput) // Add the name to the array
+                });
+    
+                console.log(`Name "${nameInput}" added to Firestore under ${userEmail}`);
+              } catch (error) {
+                console.error('Error updating Firestore:', error);
+              }
+            }
+          });
+        } else {
+          console.log('No user is logged in.');
+        }
+      });
+    </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const loadEl = document.querySelector('#load');
+        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+        // // The Firebase SDK is initialized and available here!
+        //
+        // firebase.auth().onAuthStateChanged(user => { });
+        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
+        // firebase.firestore().doc('/foo/bar').get().then(() => { });
+        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
+        // firebase.messaging().requestPermission().then(() => { });
+        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
+        // firebase.analytics(); // call to activate
+        // firebase.analytics().logEvent('tutorial_completed');
+        // firebase.performance(); // call to activate
+        //
+        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+
+        try {
+          let app = firebase.app();
+          let features = [
+            'auth', 
+            'database', 
+            'firestore',
+            'functions',
+            'messaging', 
+            'storage', 
+            'analytics', 
+            'remoteConfig',
+            'performance',
+          ].filter(feature => typeof app[feature] === 'function');
+          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
+        } catch (e) {
+          console.error(e);
+          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
+        }
+      });
+    </script>
+
   </body>
 </html>
